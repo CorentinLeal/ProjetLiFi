@@ -16,10 +16,17 @@ import android.util.Log;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
+import com.google.android.gms.maps.CameraUpdate;
+import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.MapView;
+import com.google.android.gms.maps.SupportMapFragment;
 import com.lize.oledcomm.camera_lifisdk_android.LiFiSdkManager;
 import com.lize.oledcomm.camera_lifisdk_android.ILiFiPosition;
 import com.lize.oledcomm.camera_lifisdk_android.V1.LiFiCamera;
 
+@SuppressWarnings("deprecation")
 public class MainActivity extends AppCompatActivity {
 
     private SmsBroadcastReceiver smsBroadcastReceiver = new SmsBroadcastReceiver();
@@ -28,6 +35,9 @@ public class MainActivity extends AppCompatActivity {
     // Private managers
     private LiFiSdkManager liFiSdkManager;
     private LocationManager locationManager;
+
+    GoogleMap mapView;
+
 
     private static final int PERMISSION_REQUEST_CAMERA = 1;
     private static final int READ_SMS_PERMISSIONS_REQUEST = 1;
@@ -39,6 +49,7 @@ public class MainActivity extends AppCompatActivity {
         Log.d("toto", "onCreate123");
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
         this.getLocation();
         textView = (TextView) findViewById(R.id.textView);
         requestPermissions();
@@ -151,12 +162,17 @@ public class MainActivity extends AppCompatActivity {
             requestPermissions(new String[]{Manifest.permission.ACCESS_COARSE_LOCATION},
                     READ_LOCATION);
            }
+
+
             this.locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
             String locationProvider = LocationManager.GPS_PROVIDER;
 
             Location location = locationManager.getLastKnownLocation(locationProvider);
             Log.i("Location","Position "+location.toString());
-            return location.toString();
+            Toast.makeText(this, location.getLatitude() + " / " + location.getLongitude() , Toast.LENGTH_LONG).show();
+            GoogleMap map = ((SupportMapFragment) getFragmentManager().findFragmentById(R.id.map)).getMap();
+            this.mapView.setLatLngBoundsForCameraTarget(location.getLatitude(),location.getLongitude());
+             return location.toString();
 
     }
 

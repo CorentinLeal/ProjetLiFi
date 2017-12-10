@@ -28,6 +28,7 @@ dependencies {
     compile 'com.android.support.constraint:constraint-layout:1.0.0-alpha7'
     testCompile 'junit:junit:4.12'
     compile(name:'camera-lifisdk-android-v0.1', ext:'aar')
+    implementation 'com.google.android.gms:play-services-maps:11.0.0'
 }
 
 repositories {
