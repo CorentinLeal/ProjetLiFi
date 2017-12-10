@@ -1,12 +1,11 @@
 package com.projet.corentin.projetlifi;
 
 import android.Manifest;
-import android.content.ContentResolver;
 import android.content.Context;
 import android.content.pm.PackageManager;
-import android.database.Cursor;
+import android.location.Location;
+import android.location.LocationManager;
 import android.media.AudioManager;
-import android.net.Uri;
 import android.os.Vibrator;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
@@ -25,9 +24,14 @@ public class MainActivity extends AppCompatActivity {
 
     private SmsBroadcastReceiver smsBroadcastReceiver = new SmsBroadcastReceiver();
     private static MainActivity inst;
+
+    // Private managers
     private LiFiSdkManager liFiSdkManager;
+    private LocationManager locationManager;
+
     private static final int PERMISSION_REQUEST_CAMERA = 1;
     private static final int READ_SMS_PERMISSIONS_REQUEST = 1;
+    private static final int READ_LOCATION = 1;
     TextView textView = null;
 
     @Override
@@ -35,7 +39,7 @@ public class MainActivity extends AppCompatActivity {
         Log.d("toto", "onCreate123");
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
+        this.getLocation();
         textView = (TextView) findViewById(R.id.textView);
         requestPermissions();
         liFiSdkManager = new LiFiSdkManager(this, LiFiSdkManager.CAMERA_LIB_VERSION_0_1,
@@ -55,6 +59,7 @@ public class MainActivity extends AppCompatActivity {
         /////// SMS
 
         this.smsBroadcastReceiver = new SmsBroadcastReceiver();
+
 
     }
 
@@ -123,13 +128,40 @@ public class MainActivity extends AppCompatActivity {
         Toast.makeText(this, content, Toast.LENGTH_LONG).show();
     }
 
-    public void handleMessage(String content){
-        if (content.equals(getString(R.string.sms_locate_msg))){
+    public void handleMessage(String content) {
+        if (content.equals(getString(R.string.sms_locate_msg))) {
             Vibrator vibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
             vibrator.vibrate(2000);
             AudioManager audioManager = (AudioManager) getSystemService(AUDIO_SERVICE);
             audioManager.playSoundEffect(AudioManager.FX_KEY_CLICK, 10);
+            getLocation();
         }
+    }
+
+    public String getLocation() {
+        Log.i("Location", "called");
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
+                ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            if (shouldShowRequestPermissionRationale(
+                    Manifest.permission.ACCESS_FINE_LOCATION)) {
+                Toast.makeText(this, "Please allow permission!", Toast.LENGTH_SHORT).show();
+            }
+            requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+                    READ_LOCATION);
+            requestPermissions(new String[]{Manifest.permission.ACCESS_COARSE_LOCATION},
+                    READ_LOCATION);
+           }
+            this.locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
+            String locationProvider = LocationManager.GPS_PROVIDER;
+
+            Location location = locationManager.getLastKnownLocation(locationProvider);
+            Log.i("Location","Position "+location.toString());
+            return location.toString();
+
+    }
+
+    public Location getLocation(Location location){
+        return location;
     }
 //    public void refreshSmsInbox() {
 //        ContentResolver contentResolver = getContentResolver();
