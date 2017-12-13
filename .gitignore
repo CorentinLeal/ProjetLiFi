@@ -14,6 +14,7 @@ Thumbs.db
 .idea
 .gradle
 /local.properties
+/.idea/modules
 /.idea/workspace.xml
 /.idea/libraries
 .DS_Store
@@ -23,3 +24,4 @@ Thumbs.db
 .navigation
 output.json
 obj/
+build.gradle
