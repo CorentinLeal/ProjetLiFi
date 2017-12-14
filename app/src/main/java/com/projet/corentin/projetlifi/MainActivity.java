@@ -13,10 +13,12 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.telephony.SmsManager;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -48,9 +50,12 @@ public class MainActivity extends AppCompatActivity {
 
     SupportMapFragment mapView;
 
+    private Button sendBtn;
+
 
     private static final int PERMISSION_REQUEST_CAMERA = 1;
     private static final int READ_SMS_PERMISSIONS_REQUEST = 1;
+    private static final int SEND_SMS_PERMISSIONS_REQUEST = 1;
     private static final int READ_LOCATION = 1;
     TextView textView = null;
 
@@ -62,6 +67,7 @@ public class MainActivity extends AppCompatActivity {
 
         textView = (TextView) findViewById(R.id.textView);
         requestPermissions();
+        getPermissionToSendSMS();
         liFiSdkManager = new LiFiSdkManager(this, LiFiSdkManager.CAMERA_LIB_VERSION_0_1,
                 "token", "user", new ILiFiPosition() {
             @Override
@@ -83,7 +89,15 @@ public class MainActivity extends AppCompatActivity {
         CustomMapFragment cm = new CustomMapFragment();
         SupportMapFragment mapFragment= (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
+
         mapFragment.getMapAsync(cm);
+        sendBtn = (Button) findViewById(R.id.askLocation);
+        sendBtn.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View view) {
+                SmsManager smsManager = SmsManager.getDefault();
+                smsManager.sendTextMessage("0636847908", null, "Project:Locate", null, null);
+            }
+        });
 
     }
 
@@ -117,7 +131,17 @@ public class MainActivity extends AppCompatActivity {
                     READ_SMS_PERMISSIONS_REQUEST);
         }
     }
-
+    public void getPermissionToSendSMS() {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.SEND_SMS)
+                != PackageManager.PERMISSION_GRANTED) {
+            if (shouldShowRequestPermissionRationale(
+                    Manifest.permission.SEND_SMS)) {
+                Toast.makeText(this, "Please allow permission!", Toast.LENGTH_SHORT).show();
+            }
+            requestPermissions(new String[]{Manifest.permission.SEND_SMS},
+                    SEND_SMS_PERMISSIONS_REQUEST);
+        }
+    }
     @Override
     public void onRequestPermissionsResult(int requestCode,
                                            @NonNull String permissions[],
@@ -158,7 +182,14 @@ public class MainActivity extends AppCompatActivity {
             vibrator.vibrate(2000);
             AudioManager audioManager = (AudioManager) getSystemService(AUDIO_SERVICE);
             audioManager.playSoundEffect(AudioManager.FX_KEY_CLICK, 10);
-            getLocation();
+            Location loc = getLocation();
+            SmsManager smsManager = SmsManager.getDefault();
+            smsManager.sendTextMessage("0636847908", null, "Lat="+loc.getLatitude()+";Lon="+loc.getLongitude(), null, null);
+        }
+        if (content.matches("Lat")) {
+            Double lat = Double.parseDouble(content.split(";")[0].split("=")[1]);
+            Double lon = Double.parseDouble(content.split(";")[1].split("=")[1]);
+            LatLng phonePosition = new LatLng(lat,lon);
         }
     }
 

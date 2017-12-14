@@ -48,9 +48,9 @@ public class CustomMapFragment extends Fragment implements OnMapReadyCallback {
         mMap = googleMap;
 
         // Add a marker in Sydney and move the camera
-        LatLng sydney = new LatLng(-34, 151);
-        mMap.addMarker(new MarkerOptions().position(sydney).title("Marker in Sydney"));
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
+        LatLng pos = new LatLng(0, 0);
+        mMap.addMarker(new MarkerOptions().position(pos).title("Marker"));
+        mMap.moveCamera(CameraUpdateFactory.newLatLng(pos));
     }
 
     public GoogleMap getmMap() {
