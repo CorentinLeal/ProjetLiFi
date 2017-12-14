@@ -47,6 +47,7 @@ public class MainActivity extends AppCompatActivity {
     // Private managers
     private LiFiSdkManager liFiSdkManager;
     private LocationManager locationManager;
+    private CustomMapFragment customMapFragment;
 
     SupportMapFragment mapView;
 
@@ -86,11 +87,11 @@ public class MainActivity extends AppCompatActivity {
 
         this.smsBroadcastReceiver = new SmsBroadcastReceiver();
         //// MAP
-        CustomMapFragment cm = new CustomMapFragment();
+        this.customMapFragment = new CustomMapFragment();
         SupportMapFragment mapFragment= (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
 
-        mapFragment.getMapAsync(cm);
+        mapFragment.getMapAsync(this.customMapFragment);
         sendBtn = (Button) findViewById(R.id.askLocation);
         sendBtn.setOnClickListener(new View.OnClickListener() {
             public void onClick(View view) {
@@ -186,10 +187,13 @@ public class MainActivity extends AppCompatActivity {
             SmsManager smsManager = SmsManager.getDefault();
             smsManager.sendTextMessage("0636847908", null, "Lat="+loc.getLatitude()+";Lon="+loc.getLongitude(), null, null);
         }
-        if (content.matches("Lat")) {
+        if (content.contains("Lat")) {
+            Log.d("HANDLE", "HERE");
             Double lat = Double.parseDouble(content.split(";")[0].split("=")[1]);
             Double lon = Double.parseDouble(content.split(";")[1].split("=")[1]);
             LatLng phonePosition = new LatLng(lat,lon);
+
+            this.customMapFragment.setMarker(phonePosition);
         }
     }
 

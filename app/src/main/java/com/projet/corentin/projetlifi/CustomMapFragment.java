@@ -1,4 +1,5 @@
 package com.projet.corentin.projetlifi;
+import android.graphics.Camera;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -10,7 +11,10 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.LatLngBounds;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 public class CustomMapFragment extends Fragment implements OnMapReadyCallback {
@@ -53,7 +57,15 @@ public class CustomMapFragment extends Fragment implements OnMapReadyCallback {
         mMap.moveCamera(CameraUpdateFactory.newLatLng(pos));
     }
 
-    public GoogleMap getmMap() {
-        return mMap;
+    public void setMarker(LatLng location){
+        final CameraPosition cameraPosition = new CameraPosition.Builder()
+                .target(location)      // Sets the center of the map to Mountain View
+                .zoom(20)                   // Sets the zoom
+                .bearing(0)                // Sets the orientation of the camera to east
+                .tilt(30)                   // Sets the tilt of the camera to 30 degrees
+                .build();
+        mMap.addMarker(new MarkerOptions().position(location).title("Phone"));
+        mMap.moveCamera(CameraUpdateFactory.newLatLng(location));
+        mMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
     }
 }
