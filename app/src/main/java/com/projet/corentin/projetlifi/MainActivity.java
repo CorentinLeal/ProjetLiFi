@@ -20,14 +20,20 @@ import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
 import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.LocationSource;
+import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.MapView;
+import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.LatLngBounds;
+import com.google.android.gms.maps.model.MarkerOptions;
 import com.lize.oledcomm.camera_lifisdk_android.LiFiSdkManager;
 import com.lize.oledcomm.camera_lifisdk_android.ILiFiPosition;
 import com.lize.oledcomm.camera_lifisdk_android.V1.LiFiCamera;
 
 @SuppressWarnings("deprecation")
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements OnMapReadyCallback {
 
     private SmsBroadcastReceiver smsBroadcastReceiver = new SmsBroadcastReceiver();
     private static MainActivity inst;
@@ -36,7 +42,7 @@ public class MainActivity extends AppCompatActivity {
     private LiFiSdkManager liFiSdkManager;
     private LocationManager locationManager;
 
-    GoogleMap mapView;
+    MapFragment mapView;
 
 
     private static final int PERMISSION_REQUEST_CAMERA = 1;
@@ -50,7 +56,6 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        this.getLocation();
         textView = (TextView) findViewById(R.id.textView);
         requestPermissions();
         liFiSdkManager = new LiFiSdkManager(this, LiFiSdkManager.CAMERA_LIB_VERSION_0_1,
@@ -70,7 +75,10 @@ public class MainActivity extends AppCompatActivity {
         /////// SMS
 
         this.smsBroadcastReceiver = new SmsBroadcastReceiver();
-
+        //// MAP
+        MapFragment mapFragment= (MapFragment) getFragmentManager()
+                .findFragmentById(R.id.map);
+        mapFragment.getMapAsync(this);
 
     }
 
@@ -149,7 +157,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    public String getLocation() {
+    public Location getLocation() {
         Log.i("Location", "called");
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
                 ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
@@ -161,23 +169,38 @@ public class MainActivity extends AppCompatActivity {
                     READ_LOCATION);
             requestPermissions(new String[]{Manifest.permission.ACCESS_COARSE_LOCATION},
                     READ_LOCATION);
-           }
+        }
 
 
-            this.locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
-            String locationProvider = LocationManager.GPS_PROVIDER;
+        this.locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
+        String locationProvider = LocationManager.GPS_PROVIDER;
 
-            Location location = locationManager.getLastKnownLocation(locationProvider);
-            Log.i("Location","Position "+location.toString());
-            Toast.makeText(this, location.getLatitude() + " / " + location.getLongitude() , Toast.LENGTH_LONG).show();
-            GoogleMap map = ((SupportMapFragment) getFragmentManager().findFragmentById(R.id.map)).getMap();
-            this.mapView.setLatLngBoundsForCameraTarget(location.getLatitude(),location.getLongitude());
-             return location.toString();
+        Location location = locationManager.getLastKnownLocation(locationProvider);
+        Log.i("Location", "Position " + location.toString());
+        Toast.makeText(this, location.getLatitude() + " / " + location.getLongitude(), Toast.LENGTH_LONG).show();
+
+        return location;
 
     }
 
-    public Location getLocation(Location location){
-        return location;
+
+    @Override
+    public void onMapReady(GoogleMap googleMap) {
+        Log.d("MapReady","called");
+        Location aLocation = this.getLocation();
+
+        LatLng phoneLocation = new LatLng(aLocation.getLatitude(), aLocation.getLongitude());
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+             return;
+        }
+        googleMap.setMyLocationEnabled(true);
+        googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(phoneLocation, 13));
+
+        googleMap.addMarker(new MarkerOptions()
+                .title("Sydney")
+                .snippet("The most populous city in Australia.")
+                .position(phoneLocation));
+
     }
 //    public void refreshSmsInbox() {
 //        ContentResolver contentResolver = getContentResolver();
