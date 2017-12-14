@@ -8,11 +8,15 @@ import android.location.LocationManager;
 import android.media.AudioManager;
 import android.os.Vibrator;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -33,7 +37,7 @@ import com.lize.oledcomm.camera_lifisdk_android.ILiFiPosition;
 import com.lize.oledcomm.camera_lifisdk_android.V1.LiFiCamera;
 
 @SuppressWarnings("deprecation")
-public class MainActivity extends AppCompatActivity implements OnMapReadyCallback {
+public class MainActivity extends AppCompatActivity {
 
     private SmsBroadcastReceiver smsBroadcastReceiver = new SmsBroadcastReceiver();
     private static MainActivity inst;
@@ -42,7 +46,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private LiFiSdkManager liFiSdkManager;
     private LocationManager locationManager;
 
-    MapFragment mapView;
+    SupportMapFragment mapView;
 
 
     private static final int PERMISSION_REQUEST_CAMERA = 1;
@@ -76,9 +80,10 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         this.smsBroadcastReceiver = new SmsBroadcastReceiver();
         //// MAP
-        MapFragment mapFragment= (MapFragment) getFragmentManager()
+        CustomMapFragment cm = new CustomMapFragment();
+        SupportMapFragment mapFragment= (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
-        mapFragment.getMapAsync(this);
+        mapFragment.getMapAsync(cm);
 
     }
 
@@ -183,25 +188,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     }
 
-
-    @Override
-    public void onMapReady(GoogleMap googleMap) {
-        Log.d("MapReady","called");
-        Location aLocation = this.getLocation();
-
-        LatLng phoneLocation = new LatLng(aLocation.getLatitude(), aLocation.getLongitude());
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-             return;
-        }
-        googleMap.setMyLocationEnabled(true);
-        googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(phoneLocation, 13));
-
-        googleMap.addMarker(new MarkerOptions()
-                .title("Sydney")
-                .snippet("The most populous city in Australia.")
-                .position(phoneLocation));
-
-    }
 //    public void refreshSmsInbox() {
 //        ContentResolver contentResolver = getContentResolver();
 //        Cursor smsInboxCursor = contentResolver.query(Uri.parse("content://sms/inbox"), null, null, null, null);
